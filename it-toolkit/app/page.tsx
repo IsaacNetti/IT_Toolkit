@@ -17,6 +17,15 @@ export default function Home() {
               <p className="text-slate-400 text-sm">Create strong, unique passwords with customizable options</p>
             </div>
           </Link>
+
+          {/* Commands Reference */}
+          <Link href="/commands">
+            <div className="h-full p-6 bg-slate-800 border-2 border-slate-700 rounded-lg hover:border-emerald-500 transition-all hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer group">
+              <div className="text-4xl mb-3">⌘</div>
+              <h2 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400">Commands Reference</h2>
+              <p className="text-slate-400 text-sm">Quick access to essential shortcuts and commands for all platforms</p>
+            </div>
+          </Link>
         </div>
       </div>
     </main>
