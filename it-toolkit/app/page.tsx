@@ -24,6 +24,14 @@ export default function Home() {
               <p className="text-slate-400 text-sm">Quick access to essential shortcuts and commands for all platforms</p>
             </div>
           </Link>
+
+          {/* Call Notes & Troubleshooting */}
+          <Link href="/calls">
+            <div className="h-full p-6 bg-slate-800 border-2 border-slate-700 rounded-lg hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer group">
+              <h2 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400">Call Notes & Troubleshooting</h2>
+              <p className="text-slate-400 text-sm">Track multiple IT calls with notes and troubleshooting to-dos</p>
+            </div>
+          </Link>
         </div>
       </div>
     </main>
