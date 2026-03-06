@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Button, PageWrapper } from '@/components/ui';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 
 const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -52,7 +54,7 @@ function generatePassword(length: number): string {
 export default function PasswordGenerator() {
   const [password, setPassword] = useState('');
   const [length, setLength] = useState(16);
-  const [copied, setCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   // Generate password on mount and when length changes
   useEffect(() => {
@@ -62,16 +64,7 @@ export default function PasswordGenerator() {
 
   const handleCopy = async () => {
     if (!password) return;
-
-    try {
-      await navigator.clipboard.writeText(password);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy password:', err);
-      // Fallback: show error message
-      alert('Failed to copy password. Please try again.');
-    }
+    await copyToClipboard(password);
   };
 
   const handleRegenerate = () => {
@@ -80,50 +73,47 @@ export default function PasswordGenerator() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
-      <div className="max-w-md mx-auto">
-        {/* Header with back link */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-slate-400 hover:text-slate-200 transition-colors mb-6"
-          >
-            <span className="mr-2">←</span>
-            Back to Toolkit
-          </Link>
-          <h1 className="text-4xl font-bold text-white mb-2">Password Generator</h1>
-          <p className="text-slate-400">Create strong, unique passwords securely</p>
-        </div>
+    <PageWrapper maxWidth="max-w-md">
+      {/* Header with back link */}
+      <div className="mb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center text-slate-400 hover:text-slate-200 transition-colors mb-6"
+        >
+          <span className="mr-2">←</span>
+          Back to Toolkit
+        </Link>
+        <h1 className="text-4xl font-bold text-white mb-2">Password Generator</h1>
+        <p className="text-slate-400">Create strong, unique passwords securely</p>
+      </div>
 
-        {/* Password Display */}
-        <div className="mb-8">
-          <label htmlFor="password" className="block text-sm font-semibold text-slate-200 mb-3">
-            Generated Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type="text"
-              readOnly
-              value={password}
-              className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-lg font-mono text-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors select-all"
-              onClick={(e) => e.currentTarget.select()}
-            />
-            {/* Copy button */}
-            <button
-              onClick={handleCopy}
-              disabled={!password}
-              aria-label="Copy password to clipboard"
-              className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded text-sm font-medium transition-all ${
-                copied
-                  ? 'bg-green-500 text-white'
-                  : password
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+      {/* Password Display */}
+      <div className="mb-8">
+        <label htmlFor="password" className="block text-sm font-semibold text-slate-200 mb-3">
+          Generated Password
+        </label>
+        <div className="relative">
+          <input
+            id="password"
+            type="text"
+            readOnly
+            value={password}
+            className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-lg font-mono text-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors select-all"
+            onClick={(e) => e.currentTarget.select()}
+          />
+          {/* Copy button */}
+          <Button
+            onClick={handleCopy}
+            disabled={!password}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 text-sm px-3 py-1 ${
+              isCopied ? 'bg-green-600 hover:bg-green-600' : ''
               }`}
+              variant={isCopied ? 'primary' : 'primary'}
+              size="sm"
+              aria-label="Copy password to clipboard"
             >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
+              {isCopied ? 'Copied!' : 'Copy'}
+            </Button>
           </div>
         </div>
 
@@ -152,12 +142,14 @@ export default function PasswordGenerator() {
         </div>
 
         {/* Generate Button */}
-        <button
+        <Button
           onClick={handleRegenerate}
-          className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+          variant="primary"
+          className="w-full"
+          size="md"
         >
           Generate New Password
-        </button>
+        </Button>
 
         {/* Info Section */}
         <div className="mt-8 p-4 bg-slate-800 rounded-lg border border-slate-700">
@@ -172,7 +164,6 @@ export default function PasswordGenerator() {
             Passwords are generated using cryptographically secure randomness.
           </p>
         </div>
-      </div>
-    </main>
+    </PageWrapper>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { Button, Input, Badge, PageWrapper } from '@/components/ui';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 
 interface Command {
   id: string;
@@ -219,6 +221,7 @@ const PLATFORMS = [
 export default function CommandsReference() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('All Platforms');
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Filter and sort commands
@@ -244,72 +247,60 @@ export default function CommandsReference() {
   }, [searchQuery, selectedPlatform]);
 
   const handleCopy = async (command: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(command);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy command:', err);
-      alert('Failed to copy command');
-    }
+    await copyToClipboard(command);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const totalResults = filteredCommands.featured.length + filteredCommands.regular.length;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Header with back link */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-slate-400 hover:text-slate-200 transition-colors mb-6"
+    <PageWrapper>
+      {/* Header with back link */}
+      <div className="mb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center text-slate-400 hover:text-slate-200 transition-colors mb-6"
+        >
+          <span className="mr-2">←</span>
+          Back to Toolkit
+        </Link>
+        <h1 className="text-4xl font-bold text-white mb-2">Common Commands Reference</h1>
+        <p className="text-slate-400">Quick access to essential shortcuts and commands for Windows, macOS, Linux, and networking</p>
+      </div>
+
+      {/* Search and Filter Section */}
+      <div className="mb-8 space-y-4">
+        {/* Search Bar */}
+        <Input
+          label="Search"
+          type="search"
+          placeholder="Search by command, platform, or use case..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          ariaLabel="Search commands"
+        />
+
+        {/* Platform Filter */}
+        <div>
+          <label htmlFor="platform" className="block text-sm font-semibold text-slate-200 mb-2">
+            Filter by Platform
+          </label>
+          <select
+            id="platform"
+            value={selectedPlatform}
+            onChange={(e) => setSelectedPlatform(e.target.value)}
+            className="w-full md:w-64 px-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+            aria-label="Filter commands by platform"
           >
-            <span className="mr-2">←</span>
-            Back to Toolkit
-          </Link>
-          <h1 className="text-4xl font-bold text-white mb-2">Common Commands Reference</h1>
-          <p className="text-slate-400">Quick access to essential shortcuts and commands for Windows, macOS, Linux, and networking</p>
+            {PLATFORMS.map((platform) => (
+              <option key={platform} value={platform}>
+                {platform}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {/* Search and Filter Section */}
-        <div className="mb-8 space-y-4">
-          {/* Search Bar */}
-          <div>
-            <label htmlFor="search" className="block text-sm font-semibold text-slate-200 mb-2">
-              Search
-            </label>
-            <input
-              id="search"
-              type="text"
-              placeholder="Search by command, platform, or use case..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-              aria-label="Search commands"
-            />
-          </div>
-
-          {/* Platform Filter */}
-          <div>
-            <label htmlFor="platform" className="block text-sm font-semibold text-slate-200 mb-2">
-              Filter by Platform
-            </label>
-            <select
-              id="platform"
-              value={selectedPlatform}
-              onChange={(e) => setSelectedPlatform(e.target.value)}
-              className="w-full md:w-64 px-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-              aria-label="Filter commands by platform"
-            >
-              {PLATFORMS.map((platform) => (
-                <option key={platform} value={platform}>
-                  {platform}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      </div>
 
         {/* Results Count */}
         <div className="mb-6 text-sm text-slate-400">
@@ -338,23 +329,18 @@ export default function CommandsReference() {
                         <code className="px-3 py-1 bg-slate-900 text-blue-300 font-mono text-sm rounded">
                           {cmd.command}
                         </code>
-                        <span className="text-xs font-semibold px-2 py-1 bg-yellow-900 text-yellow-200 rounded">
-                          {cmd.platform}
-                        </span>
+                        <Badge variant="warning">{cmd.platform}</Badge>
                       </div>
                       <p className="text-slate-300 text-sm">{cmd.useCase}</p>
                     </div>
-                    <button
+                    <Button
                       onClick={() => handleCopy(cmd.command, cmd.id)}
-                      className={`flex-shrink-0 px-3 py-2 rounded font-medium text-sm transition-all ${
-                        copiedId === cmd.id
-                          ? 'bg-green-500 text-white'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                      aria-label={`Copy command: ${cmd.command}`}
+                      variant={copiedId === cmd.id ? 'primary' : 'primary'}
+                      size="sm"
+                      className="flex-shrink-0"
                     >
                       {copiedId === cmd.id ? '✓ Copied!' : 'Copy'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -380,30 +366,24 @@ export default function CommandsReference() {
                         <code className="px-3 py-1 bg-slate-900 text-blue-300 font-mono text-sm rounded">
                           {cmd.command}
                         </code>
-                        <span className="text-xs font-semibold px-2 py-1 bg-slate-700 text-slate-200 rounded">
-                          {cmd.platform}
-                        </span>
+                        <Badge variant="default">{cmd.platform}</Badge>
                       </div>
                       <p className="text-slate-300 text-sm">{cmd.useCase}</p>
                     </div>
-                    <button
+                    <Button
                       onClick={() => handleCopy(cmd.command, cmd.id)}
-                      className={`flex-shrink-0 px-3 py-2 rounded font-medium text-sm transition-all ${
-                        copiedId === cmd.id
-                          ? 'bg-green-500 text-white'
-                          : 'bg-slate-700 text-white hover:bg-slate-600'
-                      }`}
-                      aria-label={`Copy command: ${cmd.command}`}
+                      variant={copiedId === cmd.id ? 'primary' : 'secondary'}
+                      size="sm"
+                      className="flex-shrink-0"
                     >
                       {copiedId === cmd.id ? '✓ Copied!' : 'Copy'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </div>
-    </main>
+    </PageWrapper>
   );
 }
